@@ -11,7 +11,7 @@ unique_data_sets <- data %>% distinct(paper, id) %>% nrow()
 unique_paper < unique_data_sets # more data sets than paper -> include data sets as grouping variable
 
 # pre-processing
-clean_data <- data %>% 
+dat <- data %>% 
   group_by(paper, id, subject, problem) %>% 
   rename(sample = trial, # sample: number of sampled outcome within a trial
          attended = option) %>% # attended: option from which was sampled
@@ -20,7 +20,9 @@ clean_data <- data %>%
          switch = ifelse(attended != lag(attended), 1, 0) , # identify switch (0 = no switch, 1 = switch)
          switch_n = sum(switch, na.rm = TRUE) , # number of switches in a trial
          switch_p = round(switch_n/((max(sample) - 1)), 2) , # proportion of switches in a trial
-         stop = ifelse(sample == max(sample), 1, 0)
-         )
-clean_data %>% distinct(paper, id, subject, problem) %>% nrow()
+         stop = ifelse(sample == max(sample), TRUE, NA)
+         ) %>%
+  ungroup() %>% 
+  select(index:id, type, problem, dom, cert, nout:noutB, outA1:ev1, exval:cpt, cov0, cov1, risky, subject, sample, attended, switch, start, stop, outcome, choice, switch_n, switch_p, everything())
 
+dat_free <- dat %>% filter(type == "free")
